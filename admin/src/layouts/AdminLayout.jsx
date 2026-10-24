@@ -24,6 +24,22 @@ const ROUTE_HEADER_MAP = {
     title: 'Mentors Directory',
     subtitle: 'ACADEMIC LEADERSHIP / PUBLIC REGISTRY',
   },
+  '/campus-facilities': {
+    title: 'Campus Facilities',
+    subtitle: 'INFRASTRUCTURE GALLERIES / IMAGEKIT CDN',
+  },
+  '/placements': {
+    title: 'Executive Roster',
+    subtitle: 'PLACEMENT OUTCOMES / ALUMNI DIRECTORY',
+  },
+  '/gallery': {
+    title: 'Gallery Subnavs CMS',
+    subtitle: 'CAMPUS EVENTS & ARCHIVES / IMAGEKIT CDN',
+  },
+  '/contact-cms': {
+    title: 'Contact Page CMS',
+    subtitle: 'INSTITUTIONAL HELPLINES, MAP & PROXIMITY',
+  },
   '/notices': {
     title: 'Notice Board',
     subtitle: 'OFFICIAL CIRCULARS / PUBLIC DOCUMENT DISPATCH',

@@ -15,6 +15,10 @@ import noticeRouter from './routes/notice.routes.js';
 import resultRoutes from './routes/result.routes.js';
 import studyMaterialRoutes from './routes/studyMaterial.routes.js';
 import syllabusRoutes from './routes/syllabus.routes.js';
+import campusFacilityRoutes from './routes/campusFacility.routes.js';
+import placementRosterRoutes from './routes/placementRoster.routes.js';
+import galleryRoutes from './routes/gallery.routes.js';
+import contactRoutes from './routes/contact.routes.js';
 
 const app = express();
 
@@ -64,11 +68,11 @@ app.use(
 
 app.use(compression());
 
-// Parse JSON bodies with strict payload limit to prevent memory exhaustion
-app.use(express.json({ limit: '10kb' }));
+// Parse JSON bodies with generous limit for multi-image gallery & facility CMS payloads
+app.use(express.json({ limit: '500kb' }));
 
 // Parse URL-encoded form data
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '500kb' }));
 
 // Parse incoming cookies into req.cookies
 app.use(cookieParser());
@@ -110,6 +114,10 @@ app.use('/api/v1/notices', noticeRouter);
 app.use('/api/v1/results', resultRoutes);
 app.use('/api/v1/study-materials', studyMaterialRoutes);
 app.use('/api/v1/syllabus', syllabusRoutes);
+app.use('/api/v1/campus-facilities', campusFacilityRoutes);
+app.use('/api/v1/placements', placementRosterRoutes);
+app.use('/api/v1/gallery', galleryRoutes);
+app.use('/api/v1/contact', contactRoutes);
 
 // =========================================
 // 6. ERROR HANDLING

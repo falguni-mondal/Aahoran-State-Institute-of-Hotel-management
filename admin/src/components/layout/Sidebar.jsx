@@ -12,6 +12,10 @@ import {
   ScrollText,
   LogOut,
   Building2,
+  Building,
+  Briefcase,
+  Images,
+  PhoneCall,
   X,
   Loader2,
 } from 'lucide-react';
@@ -83,6 +87,26 @@ export default function Sidebar({
       icon: GraduationCap,
     },
     {
+      label: 'Campus Facilities',
+      path: '/campus-facilities',
+      icon: Building,
+    },
+    {
+      label: 'Executive Roster',
+      path: '/placements',
+      icon: Briefcase,
+    },
+    {
+      label: 'Gallery Subnavs',
+      path: '/gallery',
+      icon: Images,
+    },
+    {
+      label: 'Contact Page CMS',
+      path: '/contact-cms',
+      icon: PhoneCall,
+    },
+    {
       label: 'Notice Board',
       path: '/notices',
       icon: Bell,
@@ -142,10 +166,7 @@ export default function Sidebar({
         }`}
       />
 
-      {/* Responsive Sidebar Container:
-          - Mobile & Tablet (< lg): Fixed off-canvas slide-over drawer (w-72 sm:w-80)
-          - Desktop (lg, xl, 2xl): Static docked column
-      */}
+      {/* Responsive Sidebar Container */}
       <aside
         data-lenis-prevent="true"
         className={`fixed inset-y-0 left-0 z-50 flex h-screen w-72 max-w-[85vw] shrink-0 flex-col justify-between border-r border-[#E6E2D8] bg-[#FFFFFF] p-4 shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:w-80 sm:p-5 lg:static lg:z-20 lg:w-68 lg:max-w-none lg:translate-x-0 lg:shadow-none xl:w-76 2xl:w-84 2xl:p-6 ${

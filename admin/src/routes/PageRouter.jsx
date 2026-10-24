@@ -24,6 +24,10 @@ import Dashboard from '../pages/Dashboard.jsx';
 import AuditLogs from '../pages/AuditLogs.jsx';
 import ManageAdmins from '../pages/ManageAdmins.jsx';
 import ManageMentors from '../pages/ManageMentors.jsx';
+import ManageCampusFacilities from '../pages/ManageCampusFacilities.jsx';
+import ManagePlacements from '../pages/ManagePlacements.jsx';
+import ManageGallery from '../pages/ManageGallery.jsx';
+import ManageContact from '../pages/ManageContact.jsx';
 import ManageNotices from '../pages/ManageNotices.jsx';
 import ManageResults from '../pages/ManageResults.jsx';
 import ManageStudyMaterials from '../pages/ManageStudyMaterials.jsx';
@@ -33,7 +37,7 @@ import ManageSyllabus from '../pages/ManageSyllabus.jsx';
 const PageLoader = () => (
   <div className="flex min-h-screen w-full items-center justify-center bg-[#F7F5F0] px-4 py-8 text-[#303030]">
     <div className="flex flex-col items-center gap-4 text-center">
-      <div className="relative flex h-14 w-14 items-center justify-center sm:h-16 sm:w-16 2xl:h-20 2xl:w-20">
+      <div className="relative flex h-14 w-14 items-center justify-center sm:h-16 sm:w-16 2xl:h-20 2xl:h-20">
         <div className="absolute inset-0 animate-spin rounded-full border-2 border-[#E6E2D8] border-t-[#E85D04]" />
         <span className="font-serif text-sm font-semibold tracking-wider text-[#303030] 2xl:text-base">
           SIHM
@@ -208,6 +212,10 @@ const PageRouter = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/audit-logs" element={<AuditLogs />} />
           <Route path="/mentors" element={<ManageMentors />} />
+          <Route path="/campus-facilities" element={<ManageCampusFacilities />} />
+          <Route path="/placements" element={<ManagePlacements />} />
+          <Route path="/gallery" element={<ManageGallery />} />
+          <Route path="/contact-cms" element={<ManageContact />} />
           <Route path="/notices" element={<ManageNotices />} />
           <Route path="/results" element={<ManageResults />} />
           <Route path="/study-materials" element={<ManageStudyMaterials />} />

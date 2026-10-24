@@ -31,6 +31,35 @@ export const getPublicMentors = catchAsync(async (req, res, next) => {
 });
 
 // =========================================
+// 2B. PUBLIC: GET PRINCIPAL MENTOR (Homepage)
+// Fetches mentor with designation "principal" regardless of isActive status
+// =========================================
+export const getPrincipalMentor = catchAsync(async (req, res, next) => {
+  // Prefer exact case-insensitive "principal" match first, regardless of isActive
+  let principal = await Mentor.findOne({
+    role: { $regex: /^\s*principal\s*$/i },
+  })
+    .sort({ updatedAt: -1, order: 1, createdAt: -1 })
+    .select('-__v')
+    .lean();
+
+  // Fallback to any designation containing "principal" (e.g. "Principal, SIHM Durgapur")
+  if (!principal) {
+    principal = await Mentor.findOne({
+      role: { $regex: /principal/i },
+    })
+      .sort({ updatedAt: -1, order: 1, createdAt: -1 })
+      .select('-__v')
+      .lean();
+  }
+
+  res.status(200).json({
+    status: 'success',
+    principal: principal || null,
+  });
+});
+
+// =========================================
 // 3. ADMIN: GET ALL MENTORS (Admin CMS)
 // =========================================
 export const getAllMentorsAdmin = catchAsync(async (req, res, next) => {

@@ -13,11 +13,13 @@ import {
   Upload,
   Loader2,
   ShieldAlert,
-  Image as ImageIcon,
+  Sparkles,
 } from 'lucide-react';
 import apiClient from '../api/axios.js';
 import { uploadToImageKit } from '../utils/imagekitUpload.js';
 import { useLenis } from '../providers/SmoothScrollProvider.jsx';
+
+const isPrincipalRole = (role) => /principal/i.test(String(role || '').trim());
 
 export default function ManageMentors() {
   const lenis = useLenis();
@@ -283,7 +285,7 @@ export default function ManageMentors() {
             Mentors <span className="italic text-[#E85D04]">Directory</span>
           </h2>
           <p className="mt-1 font-sans text-xs text-[#707884] sm:text-xs md:text-sm 2xl:text-base">
-            Manage academic mentors, certifications, portrait assets, and public directory ordering.
+            Manage academic mentors, portrait assets, and directory ordering. Any mentor with designation &ldquo;Principal&rdquo; is automatically featured on the Homepage (even if hidden from the About page).
           </p>
         </div>
 
@@ -346,86 +348,97 @@ export default function ManageMentors() {
             </span>
           </div>
         ) : (
-          mentors.map((mentor) => (
-            <div
-              key={mentor._id}
-              className={`group flex flex-col justify-between overflow-hidden rounded-2xl border bg-[#FFFFFF] p-5 shadow-[0_10px_30px_rgba(48,48,48,0.03)] transition-all hover:shadow-[0_15px_35px_rgba(48,48,48,0.06)] ${
-                mentor.isActive ? 'border-[#E6E2D8]' : 'border-[#E6E2D8]/60 opacity-60'
-              }`}
-            >
-              <div>
-                <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-[#F7F5F0]">
-                  <img
-                    src={mentor.image}
-                    alt={mentor.name}
-                    className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:scale-105 group-hover:grayscale-0"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleToggleActive(mentor)}
-                    className="absolute top-2.5 right-2.5 rounded-lg border border-[#E6E2D8] bg-[#FFFFFF]/90 p-1.5 text-xs text-[#303030] backdrop-blur-sm transition-colors hover:bg-[#FFFFFF]"
-                    title={mentor.isActive ? 'Published on website' : 'Draft / Hidden'}
-                  >
-                    {mentor.isActive ? (
-                      <Eye className="h-3.5 w-3.5 text-emerald-600" />
-                    ) : (
-                      <EyeOff className="h-3.5 w-3.5 text-[#707884]" />
+          mentors.map((mentor) => {
+            const isPrincipal = isPrincipalRole(mentor.role);
+
+            return (
+              <div
+                key={mentor._id}
+                className={`group flex flex-col justify-between overflow-hidden rounded-2xl border bg-[#FFFFFF] p-5 shadow-[0_10px_30px_rgba(48,48,48,0.03)] transition-all hover:shadow-[0_15px_35px_rgba(48,48,48,0.06)] ${
+                  mentor.isActive ? 'border-[#E6E2D8]' : 'border-[#E6E2D8]/60 opacity-75'
+                }`}
+              >
+                <div>
+                  <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-[#F7F5F0]">
+                    <img
+                      src={mentor.image}
+                      alt={mentor.name}
+                      className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:scale-105 group-hover:grayscale-0"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleToggleActive(mentor)}
+                      className="absolute top-2.5 right-2.5 rounded-lg border border-[#E6E2D8] bg-[#FFFFFF]/90 p-1.5 text-xs text-[#303030] backdrop-blur-sm transition-colors hover:bg-[#FFFFFF]"
+                      title={mentor.isActive ? 'Published on About page' : 'Hidden from About page'}
+                    >
+                      {mentor.isActive ? (
+                        <Eye className="h-3.5 w-3.5 text-emerald-600" />
+                      ) : (
+                        <EyeOff className="h-3.5 w-3.5 text-[#707884]" />
+                      )}
+                    </button>
+
+                    {isPrincipal && (
+                      <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 rounded-md bg-[#E85D04] px-2 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-wider text-[#FFFFFF] shadow-sm">
+                        <Sparkles className="h-3 w-3" />
+                        Homepage Principal
+                      </span>
                     )}
-                  </button>
 
-                  <span className="absolute bottom-2.5 left-2.5 rounded-md border border-[#E6E2D8] bg-[#FFFFFF]/90 px-2 py-0.5 font-mono text-[10px] font-semibold text-[#707884] backdrop-blur-sm">
-                    Seq #{mentor.order ?? 0}
-                  </span>
+                    <span className="absolute bottom-2.5 left-2.5 rounded-md border border-[#E6E2D8] bg-[#FFFFFF]/90 px-2 py-0.5 font-mono text-[10px] font-semibold text-[#707884] backdrop-blur-sm">
+                      Seq #{mentor.order ?? 0}
+                    </span>
+                  </div>
+
+                  <div className="mt-4">
+                    <h3 className="font-serif text-lg font-normal text-[#303030] 2xl:text-xl">
+                      {mentor.name}
+                    </h3>
+                    <p className="mt-0.5 text-xs font-medium text-[#E85D04] 2xl:text-sm">
+                      {mentor.role}
+                    </p>
+                    <p className="mt-2 text-[11px] text-[#707884] line-clamp-2 2xl:text-xs">
+                      {mentor.achievements?.join(' • ') || 'No achievements listed'}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="mt-4">
-                  <h3 className="font-serif text-lg font-normal text-[#303030] 2xl:text-xl">
-                    {mentor.name}
-                  </h3>
-                  <p className="mt-0.5 text-xs font-medium text-[#E85D04] 2xl:text-sm">
-                    {mentor.role}
-                  </p>
-                  <p className="mt-2 text-[11px] text-[#707884] line-clamp-2 2xl:text-xs">
-                    {mentor.achievements?.join(' • ') || 'No achievements listed'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-5 flex items-center justify-between border-t border-[#E6E2D8] pt-3">
-                <span
-                  className={`inline-flex items-center gap-1.5 text-[11px] font-medium ${
-                    mentor.isActive ? 'text-emerald-700' : 'text-[#707884]'
-                  }`}
-                >
+                <div className="mt-5 flex items-center justify-between border-t border-[#E6E2D8] pt-3">
                   <span
-                    className={`h-1.5 w-1.5 rounded-full ${
-                      mentor.isActive ? 'bg-emerald-600' : 'bg-[#707884]'
+                    className={`inline-flex items-center gap-1.5 text-[11px] font-medium ${
+                      mentor.isActive ? 'text-emerald-700' : 'text-[#707884]'
                     }`}
-                  />
-                  {mentor.isActive ? 'Published' : 'Hidden'}
-                </span>
+                  >
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        mentor.isActive ? 'bg-emerald-600' : 'bg-[#707884]'
+                      }`}
+                    />
+                    {mentor.isActive ? 'Published on About' : 'Hidden on About'}
+                  </span>
 
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => handleOpenModal(mentor)}
-                    className="rounded-lg border border-[#E6E2D8] p-1.5 text-[#707884] transition-colors hover:bg-[#F7F5F0] hover:text-[#303030]"
-                    title="Edit mentor profile"
-                  >
-                    <Edit2 className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteMentor(mentor._id, mentor.name)}
-                    className="rounded-lg border border-[#E6E2D8] p-1.5 text-[#707884] transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
-                    title="Delete mentor"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenModal(mentor)}
+                      className="rounded-lg border border-[#E6E2D8] p-1.5 text-[#707884] transition-colors hover:bg-[#F7F5F0] hover:text-[#303030]"
+                      title="Edit mentor profile"
+                    >
+                      <Edit2 className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteMentor(mentor._id, mentor.name)}
+                      className="rounded-lg border border-[#E6E2D8] p-1.5 text-[#707884] transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                      title="Delete mentor"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
@@ -511,7 +524,7 @@ export default function ManageMentors() {
               {/* Full Name */}
               <div>
                 <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#707884]">
-                  Full Name & Honors
+                  Full Name &amp; Honors
                 </label>
                 <input
                   type="text"
@@ -538,6 +551,11 @@ export default function ManageMentors() {
                   disabled={isSubmitting}
                   className="mt-1.5 w-full rounded-xl border border-[#E6E2D8] bg-[#F7F5F0]/50 px-3.5 py-2.5 text-xs text-[#303030] outline-none focus:border-[#E85D04] focus:bg-[#FFFFFF] sm:text-sm"
                 />
+                {isPrincipalRole(formData.role) && (
+                  <p className="mt-1 text-[11px] font-medium text-[#E85D04]">
+                    This mentor will automatically be displayed in the Principal Message section on the Homepage (even if hidden from the About page).
+                  </p>
+                )}
               </div>
 
               {/* Display Order Sequence */}
@@ -558,7 +576,7 @@ export default function ManageMentors() {
               {/* Achievements */}
               <div>
                 <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#707884]">
-                  Achievements & Credentials (One per line)
+                  Achievements &amp; Credentials (One per line)
                 </label>
                 <textarea
                   rows={4}
@@ -588,7 +606,7 @@ export default function ManageMentors() {
                   htmlFor="mentorActiveToggle"
                   className="text-xs font-medium text-[#303030]"
                 >
-                  Publish live to public website
+                  Publish live to About Us page (Principal is always shown on Homepage)
                 </label>
               </div>
 

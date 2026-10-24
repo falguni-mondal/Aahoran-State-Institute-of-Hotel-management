@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   getPublicMentors,
+  getPrincipalMentor,
   getAllMentorsAdmin,
   createMentor,
   updateMentor,
@@ -15,6 +16,7 @@ const router = express.Router();
 // PUBLIC ENDPOINTS (Client Website)
 // =========================================
 router.get('/', getPublicMentors);
+router.get('/principal', getPrincipalMentor);
 
 // =========================================
 // PROTECTED CMS ENDPOINTS (Admin Portal)
