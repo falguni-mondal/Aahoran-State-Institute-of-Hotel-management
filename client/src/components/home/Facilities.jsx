@@ -31,7 +31,7 @@ const facilitiesData = [
   {
     id: "04",
     title: "Library",
-    img: "/library.webp",
+    img: "/images/home/library.webp",
     gridClass: "col-span-1 md:col-span-1 lg:col-span-4",
     link: "/campus-facilities#library"
   },

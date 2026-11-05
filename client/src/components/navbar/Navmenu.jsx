@@ -4,9 +4,9 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 
 /* =========================================
-   NAVIGATION DATA (Synchronized & Safe)
+   FALLBACK NAVIGATION DATA
 ========================================= */
-const navLinks = [
+const defaultNavLinks = [
   { 
     name: 'About SIHM', 
     hasDropdown: true,
@@ -25,7 +25,6 @@ const navLinks = [
       { name: 'Food and Beverage', path: '/food-and-beverage' },
       { name: 'Front Office', path: '/front-office' },
       { name: 'House Keeping', path: '/house-keeping' },
-      // { name: 'Computer Lab', path: '/about/computer-lab' },
     ]
   },
   { 
@@ -35,15 +34,10 @@ const navLinks = [
       { name: 'Short Term Courses', path: '/short-term-courses' },
       { name: 'Under Graduate Program', path: '/ug-program' },
       { name: 'Hunar Se Rozgar Tak', path: '/hunar-se-rozgar' },
-      { name: 'Syllabus', path: '/syllabus', badge: 'NEW' },
+      { name: 'Syllabus', path: '/syllabus' },
       { 
         name: 'Study Material', 
         path: '/study-material', 
-        // hasDropdown: true,
-        // subLinks: [
-        //   { name: 'SEM II', path: '/study-material/sem-ii' },
-        //   { name: 'SEM IV', path: '/study-material/sem-iv' }
-        // ]
       },
     ]
   },
@@ -53,6 +47,7 @@ const navLinks = [
     subLinks: [
       { name: 'Campus facilities', path: '/campus-facilities' },
       { name: 'Placement', path: '/placement' },
+      { name: 'Alumni Network', path: '/alumni' },
       { name: 'Anti Ragging', path: '/anti-ragging' },
       { 
         name: 'Scholarship', 
@@ -69,8 +64,9 @@ const navLinks = [
       },
     ]
   },
+  { name: 'Alumni', hasDropdown: false, path: '/alumni' },
   { name: 'Notice Board', hasDropdown: false, path: '/notice-board' },
-  { name: 'Results', hasDropdown: false, path: '/results', badge: 'NEW' },
+  { name: 'Results', hasDropdown: false, path: '/results' },
   { 
     name: 'Gallery', 
     hasDropdown: true,
@@ -205,7 +201,7 @@ const AccordionItem = ({ link, isOpen, onClick, closeMenu }) => {
   );
 };
 
-export default function Navmenu({ isOpen, closeMenu }) {
+export default function Navmenu({ isOpen, closeMenu, navLinks = defaultNavLinks }) {
   const menuRef = useRef(null);
   const mainTl = useRef(null);
   const [activeIndex, setActiveIndex] = useState(null);
@@ -220,17 +216,15 @@ export default function Navmenu({ isOpen, closeMenu }) {
   }, [isOpen]);
 
   useGSAP(() => {
-    // Start entirely hidden so it doesn't flash on mount
     gsap.set(menuRef.current, { autoAlpha: 0, yPercent: -100 });
 
     mainTl.current = gsap.timeline({ 
       paused: true,
       onReverseComplete: () => {
-        // Hides it completely after reverse animation finishes
         gsap.set(menuRef.current, { autoAlpha: 0 });
       }
     })
-      .set(menuRef.current, { autoAlpha: 1 }) // Instantly visible before sliding down
+      .set(menuRef.current, { autoAlpha: 1 })
       .fromTo(menuRef.current,
         { yPercent: -100, borderRadius: "0 0 30% 30%" },
         { yPercent: 0, borderRadius: "0% 0% 0% 0%", duration: 0.8, ease: 'expo.inOut' }
@@ -238,7 +232,7 @@ export default function Navmenu({ isOpen, closeMenu }) {
       .fromTo('.mobile-nav-item',
         { y: 30, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.6, stagger: 0.05, ease: 'power3.out' },
-        "-=0.6" // Overlaps tighter with the menu drop for a snappier feel
+        "-=0.6"
       );
   }, { scope: menuRef });
 
@@ -258,10 +252,9 @@ export default function Navmenu({ isOpen, closeMenu }) {
   return (
     <div 
       ref={menuRef}
-      data-lenis-prevent="true" // Forces Lenis to allow scrolling inside this container
-      onWheel={(e) => e.stopPropagation()} // Prevents scroll events from bubbling to a locked body
+      data-lenis-prevent="true"
+      onWheel={(e) => e.stopPropagation()}
       onTouchMove={(e) => e.stopPropagation()}
-      // Replaced inline styles and invisible utility with GSAP autoAlpha
       className="fixed inset-0 w-full h-[100dvh] bg-[var(--background)]/85 backdrop-blur-md z-40 overflow-y-auto invisible opacity-0"
     >
       <div className="w-full px-5 md:px-8 lg:px-12 pt-28 pb-20 mx-auto max-w-[800px] flex flex-col min-h-full">

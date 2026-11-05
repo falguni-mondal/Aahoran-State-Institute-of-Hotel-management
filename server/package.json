@@ -29,6 +29,9 @@
     "mongoose": "^9.10.4",
     "morgan": "^1.12.1",
     "qrcode": "^1.5.4",
-    "speakeasy": "^2.0.0"
+    "resend": "^6.37.0",
+    "speakeasy": "^2.0.0",
+    "validator": "^13.15.35",
+    "zod": "^4.6.7"
   }
 }

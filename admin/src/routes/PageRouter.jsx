@@ -16,13 +16,13 @@ import {
 } from '../store/features/authSlice.js';
 import AdminLayout from '../layouts/AdminLayout.jsx';
 
-// Eagerly imported views eliminate the second Suspense loading screen waterfall
 import Login from '../pages/Login.jsx';
 import Setup2FA from '../pages/Setup2FA.jsx';
 import Verify2FA from '../pages/Verify2FA.jsx';
 import Dashboard from '../pages/Dashboard.jsx';
 import AuditLogs from '../pages/AuditLogs.jsx';
 import ManageAdmins from '../pages/ManageAdmins.jsx';
+import ManageAlumni from '../pages/ManageAlumni.jsx';
 import ManageMentors from '../pages/ManageMentors.jsx';
 import ManageCampusFacilities from '../pages/ManageCampusFacilities.jsx';
 import ManagePlacements from '../pages/ManagePlacements.jsx';
@@ -33,7 +33,6 @@ import ManageResults from '../pages/ManageResults.jsx';
 import ManageStudyMaterials from '../pages/ManageStudyMaterials.jsx';
 import ManageSyllabus from '../pages/ManageSyllabus.jsx';
 
-// Single Unified Institutional Preloader
 const PageLoader = () => (
   <div className="flex min-h-screen w-full items-center justify-center bg-[#F7F5F0] px-4 py-8 text-[#303030]">
     <div className="flex flex-col items-center gap-4 text-center">
@@ -55,7 +54,6 @@ const PageLoader = () => (
   </div>
 );
 
-// 403 Clearance Denied Screen
 const UnauthorizedPage = () => (
   <div className="flex min-h-screen w-full items-center justify-center bg-[#F7F5F0] px-4 py-12 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-24">
     <div className="w-full max-w-md rounded-2xl border border-[#E6E2D8] bg-[#FFFFFF] p-8 text-center shadow-[0_10px_30px_rgba(48,48,48,0.04)] sm:p-10 md:max-w-lg lg:max-w-xl 2xl:max-w-2xl 2xl:p-14">
@@ -99,7 +97,6 @@ const UnauthorizedPage = () => (
   </div>
 );
 
-// 404 Route Not Located Screen
 const NotFoundPage = () => (
   <div className="flex min-h-screen w-full items-center justify-center bg-[#F7F5F0] px-4 py-12 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-24">
     <div className="w-full max-w-md rounded-2xl border border-[#E6E2D8] bg-[#FFFFFF] p-8 text-center shadow-[0_10px_30px_rgba(48,48,48,0.04)] sm:p-10 md:max-w-lg lg:max-w-xl 2xl:max-w-2xl 2xl:p-14">
@@ -126,10 +123,6 @@ const NotFoundPage = () => (
     </div>
   </div>
 );
-
-// =========================================
-// ROUTE GUARDS (LOOP-SAFE & REHYDRATION-AWARE)
-// =========================================
 
 export const PublicRoute = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -192,25 +185,21 @@ export const RoleGuard = ({ allowedRoles = [] }) => {
   return <Outlet />;
 };
 
-// =========================================
-// CENTRAL ROUTER DEFINITION
-// =========================================
 const PageRouter = () => {
   return (
     <Routes>
-      {/* Public Authentication Stages */}
       <Route element={<PublicRoute />}>
         <Route path="/login" element={<Login />} />
         <Route path="/setup-2fa" element={<Setup2FA />} />
         <Route path="/verify-2fa" element={<Verify2FA />} />
       </Route>
 
-      {/* Protected Administrative Application Routes Mounted Inside AdminLayout */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AdminLayout />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/audit-logs" element={<AuditLogs />} />
+          <Route path="/alumni" element={<ManageAlumni />} />
           <Route path="/mentors" element={<ManageMentors />} />
           <Route path="/campus-facilities" element={<ManageCampusFacilities />} />
           <Route path="/placements" element={<ManagePlacements />} />
@@ -221,14 +210,12 @@ const PageRouter = () => {
           <Route path="/study-materials" element={<ManageStudyMaterials />} />
           <Route path="/syllabus" element={<ManageSyllabus />} />
 
-          {/* SuperAdmin Level Restricted Routes */}
           <Route element={<RoleGuard allowedRoles={['SuperAdmin']} />}>
             <Route path="/admins" element={<ManageAdmins />} />
           </Route>
         </Route>
       </Route>
 
-      {/* Informational and Fallback Routes */}
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

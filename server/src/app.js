@@ -19,6 +19,7 @@ import campusFacilityRoutes from './routes/campusFacility.routes.js';
 import placementRosterRoutes from './routes/placementRoster.routes.js';
 import galleryRoutes from './routes/gallery.routes.js';
 import contactRoutes from './routes/contact.routes.js';
+import alumniRoutes from './routes/alumni.routes.js';
 
 const app = express();
 
@@ -118,6 +119,7 @@ app.use('/api/v1/campus-facilities', campusFacilityRoutes);
 app.use('/api/v1/placements', placementRosterRoutes);
 app.use('/api/v1/gallery', galleryRoutes);
 app.use('/api/v1/contact', contactRoutes);
+app.use('/api/v1/alumni', alumniRoutes);
 
 // =========================================
 // 6. ERROR HANDLING

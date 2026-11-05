@@ -20,7 +20,7 @@ const pillarsData = [
     title: "Our Mentors",
     kicker: "Industry-Trained Experts",
     desc: "SIHM Durgapur houses a well-groomed, highly educated team of faculties dedicated to the profession, bringing years of direct exposure and experience from 5-star luxury hotels.",
-    img: "/faculty-bg.webp",
+    img: "/images/food-production/fp-gallery-5.webp",
     link: "/about#faculty",
   },
   {

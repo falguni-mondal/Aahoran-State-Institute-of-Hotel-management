@@ -20,6 +20,10 @@ const ROUTE_HEADER_MAP = {
     title: 'Security Audit Logs',
     subtitle: 'CRYPTOGRAPHIC SYSTEM AUDIT / ZERO-TRUST LOG',
   },
+  '/alumni': {
+    title: 'Alumni Network & CMS',
+    subtitle: 'BATCH DIRECTORY, REUNIONS, TESTIMONIALS & ACTIVITY LOGS',
+  },
   '/mentors': {
     title: 'Mentors Directory',
     subtitle: 'ACADEMIC LEADERSHIP / PUBLIC REGISTRY',
@@ -62,7 +66,6 @@ const ROUTE_HEADER_MAP = {
   },
 };
 
-// Lightweight inline content loader so Sidebar & Topbar stay mounted during tab switches
 const ContentAreaLoader = () => (
   <div className="flex min-h-[60vh] w-full items-center justify-center">
     <div className="flex items-center gap-3 rounded-2xl border border-[#E6E2D8] bg-[#FFFFFF] px-5 py-3.5 shadow-xs">
@@ -107,11 +110,9 @@ const AdminLayout = () => {
 
   return (
     <div className="relative flex h-screen w-full overflow-hidden bg-[#F7F5F0] font-sans text-[#303030]">
-      {/* Background Architectural Watermarks */}
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(#E6E2D8_1px,transparent_1px)] [background-size:24px_24px] opacity-40" />
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_right,rgba(232,93,4,0.03),transparent_50%)]" />
 
-      {/* Responsive Sidebar (Off-canvas drawer on <lg, docked on >=lg) */}
       <Sidebar
         isOpen={isMobileNavOpen}
         onClose={() => setIsMobileNavOpen(false)}
@@ -122,7 +123,6 @@ const AdminLayout = () => {
         isLoggingOut={isLoggingOut}
       />
 
-      {/* Main Content Partition */}
       <main
         data-lenis-prevent="true"
         className="relative z-10 flex h-full min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden"

@@ -16,6 +16,7 @@ import StudyMaterial from "../pages/StudyMaterial";
 import CampusFacilities from "../pages/CampusFacilities";
 import AntiRagging from "../pages/AntiRagging";
 import Placement from "../pages/Placement";
+import Alumni from "../pages/Alumni";
 import NoticeBoard from "../pages/NoticeBoard";
 import Results from "../pages/Results";
 import OurCampus from "../pages/OurCampus";
@@ -57,10 +58,11 @@ const PageRouter = () => {
       <Route path="/study-material" element={<StudyMaterial />} />
 
 
-      {/* STUDENT ROUTES */}
+      {/* STUDENT & ALUMNI ROUTES */}
       <Route path="/campus-facilities" element={<CampusFacilities />} />
       <Route path="/anti-ragging" element={<AntiRagging />} />
       <Route path="/placement" element={<Placement />} />
+      <Route path="/alumni" element={<Alumni />} />
 
 
       {/* NOTICE BOARD */}

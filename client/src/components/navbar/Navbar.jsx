@@ -1,16 +1,17 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Navmenu from './Navmenu';
+import { getPublicNavBadges } from '../../api/alumniApi';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /* =========================================
-   NAVIGATION DATA (Synchronized & Safe)
+   BASE NAVIGATION DATA (Badges computed dynamically from DB)
 ========================================= */
-const navLinks = [
+const baseNavLinks = [
   { 
     name: 'About SIHM', 
     hasDropdown: true,
@@ -38,10 +39,11 @@ const navLinks = [
       { name: 'Short Term Courses', path: '/short-term-courses' },
       { name: 'Under Graduate Program', path: '/ug-program' },
       { name: 'Hunar Se Rozgar Tak', path: '/hunar-se-rozgar' },
-      { name: 'Syllabus', path: '/syllabus', badge: 'NEW' },
+      { name: 'Syllabus', path: '/syllabus', badgeKey: 'syllabus' },
       { 
         name: 'Study Material', 
-        path: '/study-material', 
+        path: '/study-material',
+        badgeKey: 'studyMaterial',
       },
     ]
   },
@@ -51,6 +53,7 @@ const navLinks = [
     subLinks: [
       { name: 'Campus facilities', path: '/campus-facilities' },
       { name: 'Placement', path: '/placement' },
+      { name: 'Alumni Network', path: '/alumni', badgeKey: 'alumni' },
       { name: 'Anti Ragging', path: '/anti-ragging' },
       { 
         name: 'Scholarship', 
@@ -67,8 +70,9 @@ const navLinks = [
       },
     ]
   },
-  { name: 'Notice Board', hasDropdown: false, path: '/notice-board' },
-  { name: 'Results', hasDropdown: false, path: '/results', badge: 'NEW' },
+  { name: 'Alumni', hasDropdown: false, path: '/alumni', badgeKey: 'alumni' },
+  { name: 'Notice Board', hasDropdown: false, path: '/notice-board', badgeKey: 'noticeBoard' },
+  { name: 'Results', hasDropdown: false, path: '/results', badgeKey: 'results' },
   { 
     name: 'Gallery', 
     hasDropdown: true,
@@ -90,20 +94,69 @@ export default function Navbar() {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [navBadges, setNavBadges] = useState({
+    syllabus: false,
+    studyMaterial: false,
+    noticeBoard: false,
+    results: false,
+    alumni: false,
+  });
 
-  // Dynamic Theme Logic
-  const lightHeroRoutes = ['/about/rules', '/short-term-courses', '/ug-program', '/hunar-se-rozgar', '/syllabus', '/study-material', '/anti-ragging', '/placement', '/contact', '']; 
+  // Dynamic Theme Logic: includes '/alumni' since AlumniHero is light-themed
+  const lightHeroRoutes = [
+    '/about/rules',
+    '/short-term-courses',
+    '/ug-program',
+    '/hunar-se-rozgar',
+    '/syllabus',
+    '/study-material',
+    '/anti-ragging',
+    '/placement',
+    '/alumni',
+    '/contact',
+    '',
+  ];
   const isLightHero = lightHeroRoutes.includes(location.pathname);
-  
-  // LOGIC FIX: Because the navbar background becomes white on scroll (or when the mobile menu is open), 
-  // the text MUST be dark in those states, regardless of the hero background below it.
+
   const useDarkText = isScrolled || isMobileMenuOpen || isLightHero;
+
+  // Fetch dynamic NEW badge flags from backend DB
+  useEffect(() => {
+    let isMounted = true;
+    getPublicNavBadges().then((badges) => {
+      if (isMounted && badges) {
+        setNavBadges(badges);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [location.pathname]);
+
+  // Attach "NEW" badge only when live DB records exist for that page
+  const navLinks = useMemo(() => {
+    return baseNavLinks.map((item) => {
+      const topBadge = item.badgeKey && navBadges[item.badgeKey] ? 'NEW' : null;
+      const subLinks = item.subLinks
+        ? item.subLinks.map((sub) => ({
+            ...sub,
+            badge: sub.badgeKey && navBadges[sub.badgeKey] ? 'NEW' : null,
+          }))
+        : undefined;
+      return {
+        ...item,
+        badge: topBadge,
+        subLinks,
+      };
+    });
+  }, [navBadges]);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -142,14 +195,14 @@ export default function Navbar() {
 
       <nav
         ref={navContainerRef}
-        className={`relative w-full max-w-[1920px] mx-auto px-5 md:px-8 lg:px-8 xl:px-10 2xl:px-16 flex items-center justify-between transition-all duration-500 ${
-          isScrolled || isMobileMenuOpen ? 'py-3' : 'py-4 md:py-5 lg:py-6 xl:py-8 2xl:py-10'
+        className={`relative w-full max-w-[1920px] mx-auto px-5 md:px-8 lg:px-8 xl:px-10 2xl:px-16 flex items-center justify-between transition-[padding] duration-500 ${
+          isScrolled || isMobileMenuOpen ? 'py-3' : 'py-4 md:py-5 lg:py-6 xl:py-7 2xl:py-8'
         }`}
       >
         <div 
-          className={`absolute inset-0 -z-10 transition-all duration-500 ${
-            isScrolled
-              ? 'bg-[var(--background)]/95 backdrop-blur-md border-b border-[var(--text-main)]/5 shadow-2xl shadow-[#111111]/10' 
+          className={`absolute inset-0 -z-10 transition-colors duration-500 ${
+            isScrolled || location.pathname === '/alumni'
+              ? 'bg-[var(--background)]/95 backdrop-blur-md border-b border-[var(--text-main)]/8 shadow-lg shadow-[#111111]/5' 
               : 'bg-transparent border-transparent'
           }`}
         ></div>
@@ -158,7 +211,7 @@ export default function Navbar() {
         <div className="nav-logo flex flex-col cursor-pointer group shrink-0 relative z-50 mr-4 lg:mr-6 xl:mr-8">
           <Link to="/">
             <img 
-              className="w-[90px] md:w-[100px] lg:w-[105px] xl:w-[115px] 2xl:w-[130px] transition-all duration-500" 
+              className="w-[90px] md:w-[100px] lg:w-[105px] xl:w-[115px] 2xl:w-[130px] transition-[width] duration-500" 
               src={useDarkText ? "/logo.svg" : "/logo_white.svg"}
               alt="SIHM Logo" 
             />
@@ -185,7 +238,7 @@ export default function Navbar() {
                       
                       {link.hasDropdown && (
                         <svg 
-                          className={`w-2.5 h-2.5 xl:w-3 xl:h-3 ml-1.5 transition-all duration-300 group-hover:rotate-180 ${
+                          className={`w-2.5 h-2.5 xl:w-3 xl:h-3 ml-1.5 transition-transform duration-300 group-hover:rotate-180 ${
                             useDarkText
                               ? 'text-[var(--primary-base)]/50 group-hover:text-[var(--accent)]/90'
                               : 'text-[var(--text-light)]/50 group-hover:text-[var(--accent)]/90'
@@ -204,7 +257,7 @@ export default function Navbar() {
                         </span>
                       )}
 
-                      <span className={`absolute -bottom-0 left-0 w-0 h-[1px] transition-all duration-300 group-hover:w-full ${
+                      <span className={`absolute -bottom-0 left-0 w-0 h-[1px] transition-[width] duration-300 group-hover:w-full ${
                         useDarkText ? 'bg-[var(--accent)]' : 'bg-[var(--accent)]'
                       }`}></span>
                     </>
@@ -325,7 +378,7 @@ export default function Navbar() {
             }`}>
               Pay Fee
             </span>
-            <svg className={`relative z-10 w-3 h-3 xl:w-3.5 xl:h-3.5 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 ${
+            <svg className={`relative z-10 w-3 h-3 xl:w-3.5 xl:h-3.5 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 ${
                 useDarkText 
                   ? 'text-[var(--primary-base)] group-hover:text-[var(--background)]'
                   : 'text-[var(--text-light)] group-hover:text-[var(--background)]'
@@ -370,7 +423,14 @@ export default function Navbar() {
         </div>
       </nav>
 
-      <Navmenu isOpen={isMobileMenuOpen} closeMenu={() => setIsMobileMenuOpen(false)} />
+      {/* Dedicated Normal-Flow Mount Slot for 2nd Sub-Navbar on /alumni (Never overlaps main nav) */}
+      <div id="alumni-subnav-portal-root" className="w-full relative z-40"></div>
+
+      <Navmenu
+        isOpen={isMobileMenuOpen}
+        closeMenu={() => setIsMobileMenuOpen(false)}
+        navLinks={navLinks}
+      />
     </div>
   );
 }
