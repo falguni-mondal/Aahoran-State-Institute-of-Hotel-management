@@ -138,7 +138,7 @@ export default function AboutCampusLife() {
             {/* Portrait Image */}
             <div className="campus-img-container relative w-full aspect-[3/4] overflow-hidden rounded-sm bg-[var(--primary-base)]/5 will-change-transform">
               <img 
-                src="/nchmct-bg.webp" 
+                src="/images/food-production/fp-gallery-1.webp" 
                 alt="Campus View" 
                 className="absolute inset-0 w-full h-full object-cover origin-center will-change-transform"
               />
@@ -146,7 +146,7 @@ export default function AboutCampusLife() {
             {/* Square Image */}
             <div className="campus-img-container relative w-full aspect-square overflow-hidden rounded-sm bg-[var(--primary-base)]/5 will-change-transform">
               <img 
-                src="/seminar-facility.webp" 
+                src="/images/front-office/fo-gallery-1.webp" 
                 alt="Seminar Hall" 
                 className="absolute inset-0 w-full h-full object-cover origin-center will-change-transform"
               />
@@ -158,7 +158,7 @@ export default function AboutCampusLife() {
             {/* Tall Portrait Image */}
             <div className="campus-img-container relative w-full aspect-[4/5] overflow-hidden rounded-sm bg-[var(--primary-base)]/5 will-change-transform">
               <img 
-                src="/about_facilities.webp" 
+                src="/images/front-office/fo-gallery-2.webp" 
                 alt="Hospitality Facilities" 
                 className="absolute inset-0 w-full h-full object-cover origin-center will-change-transform"
               />
@@ -166,7 +166,7 @@ export default function AboutCampusLife() {
             {/* Landscape Image */}
             <div className="campus-img-container relative w-full aspect-[4/3] overflow-hidden rounded-sm bg-[var(--primary-base)]/5 will-change-transform">
               <img 
-                src="/sports-facility.webp" 
+                src="/images/about/ft-bg.webp" 
                 alt="Sports Facility" 
                 className="absolute inset-0 w-full h-full object-cover origin-center will-change-transform"
               />
@@ -181,7 +181,7 @@ export default function AboutCampusLife() {
             {/* Square Image */}
             <div className="campus-img-container relative w-full md:w-1/2 lg:w-full aspect-square overflow-hidden rounded-sm bg-[var(--primary-base)]/5 will-change-transform">
               <img 
-                src="/seminar-facility.webp" 
+                src="/images/house-keeping/hk-hero.webp" 
                 alt="Students in Seminar" 
                 className="absolute inset-0 w-full h-full object-cover origin-center will-change-transform"
               />
@@ -189,7 +189,7 @@ export default function AboutCampusLife() {
             {/* Portrait Image */}
             <div className="campus-img-container relative w-full md:w-1/2 lg:w-full aspect-[3/4] overflow-hidden rounded-sm bg-[var(--primary-base)]/5 will-change-transform">
               <img 
-                src="/nchmct-bg.webp" 
+                src="/images/home/sports.jpeg" 
                 alt="Campus Grounds" 
                 className="absolute inset-0 w-full h-full object-cover origin-center will-change-transform"
               />

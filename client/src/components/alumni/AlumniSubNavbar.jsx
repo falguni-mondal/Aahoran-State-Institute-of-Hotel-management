@@ -14,8 +14,20 @@ export const ALUMNI_TABS = [
     ],
   },
   {
-    id: 'directory',
+    id: 'careers',
     index: '02',
+    label: 'Industry Network',
+    subTabs: [
+      { id: 'all', label: 'All 11 Hospitality Sectors' },
+      ...ALUMNI_SECTORS.map((sec) => ({
+        id: sec,
+        label: sec,
+      })),
+    ],
+  },
+  {
+    id: 'directory',
+    index: '03',
     label: 'Batch Directory',
     subTabs: [
       { id: 'all', label: 'All Verified Batches' },
@@ -24,18 +36,6 @@ export const ALUMNI_TABS = [
       { id: '2021', label: 'Batch of 2021' },
       { id: '2020', label: 'Batch of 2020' },
       { id: '2019', label: 'Batch of 2019' },
-    ],
-  },
-  {
-    id: 'careers',
-    index: '03',
-    label: 'Industry Network',
-    subTabs: [
-      { id: 'all', label: 'All 11 Hospitality Sectors' },
-      ...ALUMNI_SECTORS.map((sec) => ({
-        id: sec,
-        label: sec,
-      })),
     ],
   },
   {

@@ -96,7 +96,7 @@ export default function FTCourseList() {
         {/* Massive Parallax Image Break */}
         <div className="image-container w-full h-[50vh] md:h-[60vh] lg:h-[75vh] relative overflow-hidden bg-[var(--primary-base)]/5 mb-20 md:mb-32">
           <img 
-            src="/ft-academic.webp" 
+            src="/images/front-office/fo-about.webp" 
             alt="Academic Administration" 
             className="editorial-image absolute inset-0 w-full h-[120%] object-cover -translate-y-[10%] will-change-transform"
           />

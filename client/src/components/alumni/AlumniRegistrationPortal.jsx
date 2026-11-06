@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import {
   ALUMNI_SECTORS,
   ALUMNI_COURSES,
@@ -12,14 +14,21 @@ import {
   loginAlumnusAccount,
 } from '../../api/alumniApi';
 
+gsap.registerPlugin(useGSAP);
+
 export default function AlumniRegistrationPortal({
+  isOpen = false,
+  onClose,
   initialMode = 'register',
   currentUser = null,
   onAuthSuccess,
   onLogout,
   onCrossTabNavigate,
 }) {
+  const overlayRef = useRef(null);
+  const contentWrapRef = useRef(null);
   const fileInputRef = useRef(null);
+
   const [authTab, setAuthTab] = useState(
     initialMode === 'login' ? 'login' : 'register'
   );
@@ -28,8 +37,59 @@ export default function AlumniRegistrationPortal({
     if (initialMode === 'login' || initialMode === 'register') {
       setAuthTab(initialMode);
     }
-  }, [initialMode]);
+  }, [initialMode, isOpen]);
 
+  // Lock background page scroll and bind Escape key when full-page popup is open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose?.();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow || 'unset';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  // Smooth entrance animation when popup opens
+  useGSAP(
+    () => {
+      if (!isOpen || !overlayRef.current) return;
+
+      gsap.fromTo(
+        overlayRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.3, ease: 'power2.out', overwrite: 'auto' }
+      );
+
+      if (contentWrapRef.current) {
+        gsap.fromTo(
+          contentWrapRef.current,
+          { y: 28, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.45,
+            ease: 'expo.out',
+            delay: 0.05,
+            overwrite: 'auto',
+            clearProps: 'transform',
+          }
+        );
+      }
+    },
+    { dependencies: [isOpen] }
+  );
+
+  // Registration State
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -57,12 +117,15 @@ export default function AlumniRegistrationPortal({
   const [copiedId, setCopiedId] = useState(false);
   const [authFeedbackBanner, setAuthFeedbackBanner] = useState(null);
 
+  // Login State (Registration ID or Email + Password)
   const [loginData, setLoginData] = useState({
     identifier: '',
     password: '',
   });
   const [loginErrors, setLoginErrors] = useState({});
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  if (!isOpen) return null;
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -179,24 +242,94 @@ export default function AlumniRegistrationPortal({
     setTimeout(() => setCopiedId(false), 2500);
   };
 
+  const handleQuickNavigateAndClose = (sectionId, subFilter, hashTarget) => {
+    onClose?.();
+    onCrossTabNavigate?.(sectionId, subFilter, hashTarget);
+  };
+
   return (
-    <section
-      id="alumni-register"
-      className="relative w-full py-20 md:py-28 lg:py-36 bg-[#EFECE6] text-[var(--text-main)] border-b border-[var(--text-main)]/10 overflow-hidden"
+    <div
+      ref={overlayRef}
+      data-lenis-prevent="true"
+      onWheel={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
+      role="dialog"
+      aria-modal="true"
+      aria-label="SIHM Durgapur Alumni Registration and Login Portal"
+      className="fixed inset-0 z-[100] w-full h-[100dvh] bg-[#EFECE6]/98 backdrop-blur-md text-[var(--text-main)] overflow-y-auto overscroll-contain flex flex-col"
     >
-      <div className="w-full max-w-[1800px] mx-auto px-5 md:px-8 lg:px-12 xl:px-16 2xl:px-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+      {/* ==========================================
+          STICKY TOP BAR WITH CROSS (✕) CLOSE BUTTON
+      ========================================== */}
+      <div className="sticky top-0 z-30 w-full bg-[var(--background)]/95 backdrop-blur-md border-b border-[var(--text-main)]/12 px-4 sm:px-6 md:px-10 lg:px-14 xl:px-20 py-3.5 sm:py-4 flex items-center justify-between gap-4 shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <img
+            src="/logo.svg"
+            alt="SIHM Durgapur"
+            className="w-[78px] sm:w-[92px] md:w-[100px] h-auto shrink-0"
+          />
+          <span className="hidden sm:inline-block w-[1px] h-5 bg-[var(--text-main)]/20" />
+          <div className="min-w-0">
+            <span className="block font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--accent)] truncate">
+              Official Alumni Network Portal
+            </span>
+            <span className="block font-sans text-xs sm:text-sm font-medium text-[var(--text-main)]/80 truncate">
+              {currentUser
+                ? `Signed In: ${currentUser.registrationId}`
+                : authTab === 'login'
+                ? 'Member Sign In (Registration ID or Email)'
+                : 'New Alumnus Registration & Credential Issuance'}
+            </span>
+          </div>
+        </div>
+
+        {/* Prominent Cross (✕) Close Button */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close Alumni Portal Popup"
+          className="group flex items-center gap-2 border border-[var(--text-main)]/25 bg-white hover:bg-[#303030] hover:border-[#303030] text-[var(--text-main)] hover:text-[var(--background)] px-3.5 sm:px-4 py-2 sm:py-2.5 transition-colors duration-300 cursor-pointer shrink-0 outline-none"
+        >
+          <span className="hidden sm:inline font-sans text-[10px] font-bold uppercase tracking-[0.18em]">
+            Close
+          </span>
+          <svg
+            className="w-4 h-4 sm:w-4.5 sm:h-4.5 transition-transform duration-300 group-hover:rotate-90"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+
+      {/* ==========================================
+          RESPONSIVE FULL-PAGE POPUP BODY
+      ========================================== */}
+      <div
+        ref={contentWrapRef}
+        className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 md:px-10 lg:px-14 xl:px-20 py-8 sm:py-10 md:py-14 lg:py-16 flex-1 flex items-center"
+      >
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-14 xl:gap-16 items-start">
           {/* Left Column: Context & Benefits */}
           <div className="lg:col-span-5 flex flex-col justify-between">
             <div>
               <span className="text-[10px] md:text-xs font-semibold uppercase tracking-[0.3em] text-[var(--accent)] block mb-3">
-                08 / Alumni Authentication &amp; Registration Portal
+                SIHM Durgapur • Alumni Authentication Portal
               </span>
-              <h2 className="head-txt text-4xl sm:text-5xl md:text-6xl font-light tracking-tight leading-none text-[var(--text-main)]">
+              <h2 className="head-txt text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-light tracking-tight leading-[1.02] text-[var(--text-main)]">
                 Your Official <br />
-                <span className="italic text-[var(--accent)]">SIHM Alumni Account.</span>
+                <span className="italic text-[var(--accent)]">
+                  SIHM Alumni Account.
+                </span>
               </h2>
-              <p className="mt-6 text-sm md:text-base font-light leading-relaxed text-[var(--text-main)]/75">
+              <p className="mt-4 sm:mt-6 text-xs sm:text-sm md:text-base font-light leading-relaxed text-[var(--text-main)]/75">
                 Register once to create your lifelong{' '}
                 <strong className="text-[var(--text-main)] font-medium">
                   SIHM Alumni Account
@@ -205,25 +338,25 @@ export default function AlumniRegistrationPortal({
                 <strong className="text-[var(--accent)] font-mono">
                   Registration ID
                 </strong>{' '}
-                by email via Resend. Once signed in, the entire Alumni Portal automatically recognizes you — so you never have to re-enter your details to RSVP for reunions or post reflections.
+                by email via Resend. Once signed in, the entire Alumni Page automatically recognizes you — so you never have to re-enter your details to RSVP for reunions or post reflections.
               </p>
             </div>
 
-            <div className="mt-10 p-6 border border-[#D5CEBF] bg-white space-y-4 shadow-[0_10px_30px_rgba(48,48,48,0.03)]">
-              <div className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent)]">
+            <div className="mt-6 sm:mt-8 p-5 sm:p-6 border border-[#D5CEBF] bg-white space-y-3 shadow-[0_10px_30px_rgba(48,48,48,0.03)]">
+              <div className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] text-[var(--accent)]">
                 Email Verification &amp; Administrative Moderation
               </div>
               <p className="text-xs font-light leading-relaxed text-[var(--text-main)]/80">
                 All email addresses are verified for domain deliverability (MX records) and receive an instant credential welcome email. Public directory cards and wall posts require administrative approval before public display.
               </p>
-              <div className="pt-2 border-t border-[#E6E2D8] font-mono text-[11px] text-[var(--text-main)]/60">
+              <div className="pt-2 border-t border-[#E6E2D8] font-mono text-[10px] sm:text-[11px] text-[var(--text-main)]/60">
                 ID Format: SIHM-[YEAR]-[COURSE]-[INITIALS+HASH]
               </div>
             </div>
           </div>
 
           {/* Right Column: Authenticated Pass OR Register / Sign In Forms */}
-          <div className="lg:col-span-7 bg-white text-[var(--text-main)] p-6 sm:p-8 md:p-12 border border-[#D5CEBF] shadow-[0_15px_40px_rgba(48,48,48,0.05)]">
+          <div className="lg:col-span-7 bg-white text-[var(--text-main)] p-5 sm:p-8 md:p-10 xl:p-12 border border-[#D5CEBF] shadow-[0_15px_40px_rgba(48,48,48,0.05)]">
             {currentUser ? (
               <div className="space-y-6">
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E6E2D8] pb-4">
@@ -231,7 +364,7 @@ export default function AlumniRegistrationPortal({
                     <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-emerald-700 block">
                       ✓ Active Alumni Account Session
                     </span>
-                    <h3 className="head-txt text-3xl sm:text-4xl font-normal text-[var(--text-main)] mt-1">
+                    <h3 className="head-txt text-2xl sm:text-3xl md:text-4xl font-normal text-[var(--text-main)] mt-1">
                       Welcome Home, {currentUser.fullName}
                     </h3>
                   </div>
@@ -253,16 +386,17 @@ export default function AlumniRegistrationPortal({
                   </div>
                 )}
 
-                <div className="bg-[#303030] text-[var(--background)] p-6 sm:p-8 border-l-4 border-[var(--accent)] relative overflow-hidden">
+                {/* Digital Alumni ID Pass (Warm Charcoal & Terracotta) */}
+                <div className="bg-[#303030] text-[var(--background)] p-5 sm:p-8 border-l-4 border-[var(--accent)] relative overflow-hidden">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
+                    <div className="min-w-0">
                       <span className="text-[10px] uppercase tracking-[0.25em] text-[var(--accent)] font-semibold block">
                         SIHM Durgapur • Unique Registration ID
                       </span>
-                      <div className="mt-2 font-mono text-2xl sm:text-3xl font-bold tracking-wider text-white select-all">
+                      <div className="mt-2 font-mono text-xl sm:text-2xl md:text-3xl font-bold tracking-wider text-white select-all break-all">
                         {currentUser.registrationId}
                       </div>
-                      <div className="mt-1 font-mono text-xs text-white/70">
+                      <div className="mt-1 font-mono text-xs text-white/70 break-all">
                         Registered Email: {currentUser.email}
                       </div>
                     </div>
@@ -272,7 +406,7 @@ export default function AlumniRegistrationPortal({
                       onClick={() =>
                         handleCopyRegistrationId(currentUser.registrationId)
                       }
-                      className="px-4 py-2 bg-[var(--accent)] text-white text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-white hover:text-[#303030] transition-colors cursor-pointer self-start sm:self-center"
+                      className="px-4 py-2 bg-[var(--accent)] text-white text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-white hover:text-[#303030] transition-colors cursor-pointer self-start sm:self-center shrink-0"
                     >
                       {copiedId ? '✓ Copied ID' : 'Copy Registration ID'}
                     </button>
@@ -307,10 +441,17 @@ export default function AlumniRegistrationPortal({
                   </div>
                 </div>
 
+                {/* Quick Cross-Section Actions for Logged-In Alumnus */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                   <button
                     type="button"
-                    onClick={() => onCrossTabNavigate?.('updates', 'reunion')}
+                    onClick={() =>
+                      handleQuickNavigateAndClose(
+                        'updates',
+                        'reunion',
+                        '#alumni-updates'
+                      )
+                    }
                     className="p-3.5 border border-[#D5CEBF] bg-[var(--background)] hover:border-[var(--accent)] text-left transition-colors cursor-pointer"
                   >
                     <span className="block text-[10px] font-bold uppercase tracking-wider text-[var(--accent)]">
@@ -324,7 +465,11 @@ export default function AlumniRegistrationPortal({
                   <button
                     type="button"
                     onClick={() =>
-                      onCrossTabNavigate?.('testimonials', 'share')
+                      handleQuickNavigateAndClose(
+                        'testimonials',
+                        'share',
+                        '#alumni-testimonials'
+                      )
                     }
                     className="p-3.5 border border-[#D5CEBF] bg-[var(--background)] hover:border-[var(--accent)] text-left transition-colors cursor-pointer"
                   >
@@ -352,11 +497,12 @@ export default function AlumniRegistrationPortal({
               </div>
             ) : (
               <div>
+                {/* Mode Switcher Tabs: Register vs Sign In */}
                 <div className="flex border-b border-[#E6E2D8] mb-6">
                   <button
                     type="button"
                     onClick={() => setAuthTab('register')}
-                    className={`flex-1 pb-3.5 text-xs font-bold uppercase tracking-[0.2em] border-b-2 transition-all cursor-pointer ${
+                    className={`flex-1 pb-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.16em] sm:tracking-[0.2em] border-b-2 transition-colors cursor-pointer ${
                       authTab === 'register'
                         ? 'border-[var(--accent)] text-[var(--accent)]'
                         : 'border-transparent text-[var(--text-main)]/50 hover:text-[var(--text-main)]'
@@ -367,7 +513,7 @@ export default function AlumniRegistrationPortal({
                   <button
                     type="button"
                     onClick={() => setAuthTab('login')}
-                    className={`flex-1 pb-3.5 text-xs font-bold uppercase tracking-[0.2em] border-b-2 transition-all cursor-pointer ${
+                    className={`flex-1 pb-3.5 text-[10px] sm:text-xs font-bold uppercase tracking-[0.16em] sm:tracking-[0.2em] border-b-2 transition-colors cursor-pointer ${
                       authTab === 'login'
                         ? 'border-[var(--accent)] text-[var(--accent)]'
                         : 'border-transparent text-[var(--text-main)]/50 hover:text-[var(--text-main)]'
@@ -391,7 +537,10 @@ export default function AlumniRegistrationPortal({
                         Sign In to Your SIHM Alumni Account
                       </h3>
                       <p className="text-xs text-[var(--text-main)]/65 mt-1">
-                        Enter either your unique <strong>SIHM Registration ID</strong> (e.g., <code>SIHM-2021-BSC-...</code>) or your registered <strong>Email Address</strong> along with your password.
+                        Enter either your unique{' '}
+                        <strong>SIHM Registration ID</strong> (e.g.,{' '}
+                        <code>SIHM-2021-BSC-...</code>) or your registered{' '}
+                        <strong>Email Address</strong> along with your password.
                       </p>
                     </div>
 
@@ -459,7 +608,7 @@ export default function AlumniRegistrationPortal({
                       <button
                         type="submit"
                         disabled={isLoggingIn}
-                        className="px-8 py-4 bg-[#303030] text-[var(--background)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--accent)] transition-colors cursor-pointer disabled:opacity-50"
+                        className="w-full sm:w-auto px-8 py-4 bg-[#303030] text-[var(--background)] text-xs font-bold uppercase tracking-[0.2em] hover:bg-[var(--accent)] transition-colors cursor-pointer disabled:opacity-50"
                       >
                         {isLoggingIn ? 'Signing In...' : 'Sign In to Portal →'}
                       </button>
@@ -468,7 +617,7 @@ export default function AlumniRegistrationPortal({
                 ) : (
                   <form
                     onSubmit={handleRegisterSubmit}
-                    className="space-y-5"
+                    className="space-y-4 sm:space-y-5"
                     noValidate
                   >
                     {fieldErrors.general && (
@@ -477,7 +626,8 @@ export default function AlumniRegistrationPortal({
                       </div>
                     )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center">
+                    {/* Row 1: Full Name + Photograph Upload */}
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-5 items-center">
                       <div className="sm:col-span-4 flex items-center gap-4">
                         <div className="w-16 h-20 overflow-hidden border border-[#D5CEBF] bg-[#EFECE6] shrink-0">
                           <img
@@ -533,6 +683,7 @@ export default function AlumniRegistrationPortal({
                       </div>
                     </div>
 
+                    {/* Row 2: Email Address & Account Password */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-main)]/75 mb-1">
@@ -573,6 +724,7 @@ export default function AlumniRegistrationPortal({
                       </div>
                     </div>
 
+                    {/* Row 3: Year of Admission, Year of Passing, Course Completed */}
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                       <div className="sm:col-span-3">
                         <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-main)]/75 mb-1">
@@ -641,6 +793,7 @@ export default function AlumniRegistrationPortal({
                       </div>
                     </div>
 
+                    {/* Row 4: Current Designation, Organisation / Hotel Name */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-main)]/75 mb-1">
@@ -683,6 +836,7 @@ export default function AlumniRegistrationPortal({
                       </div>
                     </div>
 
+                    {/* Row 5: Industry Sector & Current Location */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-main)]/75 mb-1">
@@ -724,6 +878,7 @@ export default function AlumniRegistrationPortal({
                       </div>
                     </div>
 
+                    {/* Row 6: Contact Number & LinkedIn Profile */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-main)]/75 mb-1">
@@ -766,6 +921,7 @@ export default function AlumniRegistrationPortal({
                       </div>
                     </div>
 
+                    {/* Row 7: Achievements / Professional Profile */}
                     <div>
                       <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-main)]/75 mb-1">
                         Achievements / Professional Profile Summary
@@ -786,6 +942,7 @@ export default function AlumniRegistrationPortal({
                       )}
                     </div>
 
+                    {/* Row 8: Privacy & Consent Checkboxes */}
                     <div className="p-4 bg-[var(--background)] border border-[#E6E2D8] space-y-2.5 text-xs">
                       <div className="font-bold uppercase tracking-wider text-[10px] text-[var(--text-main)]">
                         Privacy &amp; Directory Display Consent
@@ -838,6 +995,7 @@ export default function AlumniRegistrationPortal({
                       </div>
                     </div>
 
+                    {/* Submit Button */}
                     <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <span className="text-xs font-mono text-[var(--text-main)]/60">
                         {statusText}
@@ -846,7 +1004,7 @@ export default function AlumniRegistrationPortal({
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-8 py-4 bg-[var(--accent)] text-white text-xs font-bold uppercase tracking-[0.2em] hover:bg-[#303030] transition-colors duration-300 cursor-pointer disabled:opacity-50"
+                        className="w-full sm:w-auto px-8 py-4 bg-[var(--accent)] text-white text-xs font-bold uppercase tracking-[0.2em] hover:bg-[#303030] transition-colors duration-300 cursor-pointer disabled:opacity-50"
                       >
                         {isSubmitting
                           ? 'Creating Account & Sending Email...'
@@ -860,6 +1018,6 @@ export default function AlumniRegistrationPortal({
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

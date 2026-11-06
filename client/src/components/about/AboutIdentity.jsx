@@ -152,7 +152,7 @@ export default function AboutIdentity() {
         <div className="identity-image-container lg:col-span-6 relative h-[350px] md:h-[500px] lg:h-[650px] xl:h-[750px] w-full overflow-hidden order-1 lg:order-2 rounded-sm">
           <div className="identity-image-mask absolute inset-0 w-full h-full bg-[var(--background)] z-10"></div>
           <img
-            src="/about_kitchen.webp"
+            src="/images/food-production/fp-gallery-4.webp"
             alt="Culinary students in training kitchen"
             className="identity-image absolute inset-0 w-full h-full object-cover object-center"
           />

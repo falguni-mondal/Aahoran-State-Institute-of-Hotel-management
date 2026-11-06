@@ -73,7 +73,7 @@ export default function AboutFacilities() {
               
               <div className="relative w-full aspect-[4/3] overflow-hidden rounded-sm bg-[var(--primary-base)]/5 mt-4 lg:mt-0">
                 <img 
-                  src="/about_facilities.webp" 
+                  src="/images/front-office/fo-gallery-1.webp" 
                   alt="SIHM Facilities and Labs" 
                   className="w-full h-full object-cover"
                 />

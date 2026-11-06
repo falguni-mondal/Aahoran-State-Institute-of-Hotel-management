@@ -9,7 +9,7 @@ const coursesData = [
     {
     id: "food-production",
     title: "Food Production",
-    image: "/st-food-production.webp",
+    image: "/images/food-production/fp-hero.webp",
     description: [
       "The Diploma in Food Production is a career-focused programme that equips students with practical skills and professional knowledge in culinary arts, kitchen operations, food safety and menu planning. Through hands-on training, students develop the competencies required to work effectively in professional kitchens.",
       "Graduates can pursue opportunities as Commis Chef, Demi Chef de Partie, Kitchen Assistant, Bakery & Confectionery Professional, Food Production Supervisor and other culinary roles in hotels, restaurants, resorts, catering companies, cruise lines and institutional kitchens. The programme also provides a foundation for entrepreneurship and further studies in hospitality and culinary arts.",
@@ -18,7 +18,7 @@ const coursesData = [
   {
     id: "fb-service",
     title: "Food & Beverage Service",
-    image: "/st-fb-service.webp",
+    image: "/images/food-beverage/fb-hero.webp",
     description: [
       "The Diploma in Food & Beverage Service is a career-focused programme designed to develop skilled professionals in restaurant operations, guest service, beverage service and hospitality etiquette. Through practical training and industry-oriented learning, students develop the skills required to deliver efficient and professional dining experiences.",
       "Graduates can pursue opportunities as Food & Beverage Associate, Steward, Captain, Bartender, Restaurant Supervisor and other service roles in hotels, restaurants, resorts, clubs, catering establishments, cruise lines and institutional food service operations. The programme also provides a foundation for entrepreneurship and further studies in hospitality and food & beverage management.",
@@ -27,7 +27,7 @@ const coursesData = [
   {
     id: "bakery",
     title: "Bakery & Confectionery",
-    image: "/st-bakery.webp",
+    image: "/images/food-production/fp-gallery-2.webp",
     description: [
       "The Diploma in Bakery & Confectionery is a career-focused programme designed to develop professional skills in bread making, cakes, pastries, confectionery, desserts and bakery production. Through hands-on training and industry-oriented learning, students gain expertise in production techniques, food safety, presentation and bakery operations.",
       "Graduates can pursue careers as Commis Baker, Bakery Assistant, Pastry Chef, Confectioner, Cake Artist, Bakery Supervisor and other roles in hotels, bakeries, patisseries, restaurants, resorts and catering establishments. The programme also provides opportunities for entrepreneurship, specialised culinary careers and further studies in bakery and hospitality."
@@ -36,7 +36,7 @@ const coursesData = [
   {
     id: "front-office",
     title: "Front Office",
-    image: "/st-front-office.webp",
+    image: "/images/front-office/fo-hero.webp",
     description: [
       "The Diploma in Front Office is a career-focused programme designed to develop professional skills in guest relations, reservations, reception operations, check-in/check-out procedures and hotel communication. Through practical and industry-oriented training, students gain the knowledge and confidence required to deliver efficient and courteous guest services.",
       "Graduates can pursue opportunities as Front Office Associate, Receptionist, Guest Relations Executive, Reservation Associate, Front Desk Supervisor and other roles in hotels, resorts, serviced apartments, clubs, travel and hospitality establishments. The programme also provides a foundation for career advancement and further studies in hospitality management."
@@ -45,7 +45,7 @@ const coursesData = [
   {
     id: "house-keeping",
     title: "House Keeping",
-    image: "/st-housekeeping.webp",
+    image: "/images/house-keeping/hk-hero.webp",
     description: [
       "The Diploma in Housekeeping is a career-focused programme designed to develop professional skills in guestroom operations, cleaning and maintenance, hygiene, laundry and linen management, and housekeeping supervision. Through practical and industry-oriented training, students gain the skills required to maintain high standards of cleanliness, comfort and guest satisfaction.",
       "Graduates can pursue opportunities as Housekeeping Associate, Room Attendant, Public Area Attendant, Laundry Associate, Housekeeping Supervisor and other roles in hotels, resorts, hospitals, serviced apartments, cruise lines and other hospitality establishments. The programme also provides a foundation for career advancement and further studies in hospitality management.",

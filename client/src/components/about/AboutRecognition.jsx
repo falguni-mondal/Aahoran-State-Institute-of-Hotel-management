@@ -13,25 +13,25 @@ const recognitionData = [
     year: "2025",
     title: "Excellence in Culinary Education",
     organization: "Ministry of Tourism, Govt. of India",
-    img: "/nchmct-bg.webp" 
+    img: "/images/home/aahoran.webp" 
   },
   {
     year: "2024",
     title: "Best Emerging Hospitality Institute",
     organization: "Eastern India Education Excellence",
-    img: "/seminar-facility.webp"
+    img: "/images/home/sihm.webp"
   },
   {
     year: "2024",
     title: "Outstanding Placement Record",
     organization: "National Council for Hotel Management",
-    img: "/sports-facility.webp"
+    img: "/images/about/placement.webp"
   },
   {
     year: "2023",
     title: "State Award for Skill Development",
     organization: "Govt. of West Bengal",
-    img: "/about_facilities.webp"
+    img: "/images/about/award.webp"
   }
 ];
 

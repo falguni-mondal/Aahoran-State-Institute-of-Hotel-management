@@ -69,7 +69,7 @@ export default function AboutHero() {
       {/* Background Image Container */}
       <div className="absolute inset-0 w-full h-full z-0">
         <img 
-          src="/campus.webp"
+          src="/images/about/about_hero.webp"
           alt="SIHM Durgapur Campus" 
           className="hero-bg-img absolute -top-[15%] left-0 w-full h-[130%] object-cover origin-center"
         />

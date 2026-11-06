@@ -7,12 +7,12 @@ gsap.registerPlugin(ScrollTrigger);
 
 // Using your existing assets to populate the gallery
 const images = [
-  "/st-food-production.webp",
-  "/st-fb-service.webp",
-  "/st-bakery.webp",
-  "/st-housekeeping.webp",
-  "/st-front-office.webp",
-  "/about_kitchen.webp"
+  "/images/food-production/fp-gallery-1.webp",
+  "/images/food-beverage/fb-gallery-1.webp",
+  "/images/food-production/fp-gallery-2.webp",
+  "/images/house-keeping/hk-hero.webp",
+  "/images/front-office/fo-gallery-1.webp",
+  "/images/food-production/fp-gallery-4.webp"
 ];
 
 export default function HSRTGallery() {

@@ -344,7 +344,13 @@ const FALLBACK_TESTIMONIALS = [
   },
 ];
 
-const VALID_TAB_IDS = ALUMNI_TABS.map((t) => t.id);
+const SECTION_HASH_MAP = {
+  overview: '#alumni-intro',
+  careers: '#alumni-careers',
+  directory: '#alumni-directory',
+  updates: '#alumni-updates',
+  testimonials: '#alumni-testimonials',
+};
 
 export default function Alumni() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -352,11 +358,15 @@ export default function Alumni() {
   const lenis = useLenis();
   const heroSectionRef = useRef(null);
 
-  // Read active tab and subtab from URL query params (?tab=...&subtab=...)
-  const rawTab = searchParams.get('tab') || 'overview';
-  const activeTab = VALID_TAB_IDS.includes(rawTab) ? rawTab : 'overview';
-  const activeSubTab = searchParams.get('subtab') || '';
+  // Active section & sub-filter state for single-page navigation & ScrollSpy
+  const [activeSection, setActiveSection] = useState('overview');
+  const [activeSubFilter, setActiveSubFilter] = useState('');
 
+  // Full-Page Login / Registration Popup State
+  const [isAuthPopupOpen, setIsAuthPopupOpen] = useState(false);
+  const [authPopupMode, setAuthPopupMode] = useState('register');
+
+  // Data & Filter State across all single-page sections
   const [config, setConfig] = useState(null);
   const [directory, setDirectory] = useState(FALLBACK_DIRECTORY);
   const [distinguishedAlumni, setDistinguishedAlumni] = useState(
@@ -367,120 +377,194 @@ export default function Alumni() {
   );
   const [updates, setUpdates] = useState(FALLBACK_UPDATES);
   const [testimonials, setTestimonials] = useState(FALLBACK_TESTIMONIALS);
+
   const [selectedSector, setSelectedSector] = useState('ALL');
+  const [batchFilter, setBatchFilter] = useState('ALL');
+  const [updateCategoryFilter, setUpdateCategoryFilter] = useState('all');
+  const [autoOpenShareTestimonial, setAutoOpenShareTestimonial] = useState(false);
+
   const [currentUser, setCurrentUser] = useState(() => getStoredAlumniUser());
   const [isHeroScrolledPast, setIsHeroScrolledPast] = useState(false);
 
-  // Track whether the 2nd Navbar at the bottom of the Hero has reached the Main Navbar on scroll
-  useEffect(() => {
-    if (activeTab !== 'overview') {
-      setIsHeroScrolledPast(true);
-      return;
-    }
-
-    const handleScrollCheck = () => {
-      if (!heroSectionRef.current) return;
-      const headerEl = document.querySelector('header');
-      const mainNavHeight = headerEl ? headerEl.offsetHeight : 82;
-      const heroRect = heroSectionRef.current.getBoundingClientRect();
-      // When the bottom of the Hero (minus the 50px sub-navbar height) touches the Main Navbar, dock it under Main Nav
-      setIsHeroScrolledPast(heroRect.bottom - 50 <= mainNavHeight);
-    };
-
-    handleScrollCheck();
-    window.addEventListener('scroll', handleScrollCheck, { passive: true });
-    window.addEventListener('resize', handleScrollCheck);
-    return () => {
-      window.removeEventListener('scroll', handleScrollCheck);
-      window.removeEventListener('resize', handleScrollCheck);
-    };
-  }, [activeTab]);
-
-  // The 2nd Navbar sits at the bottom of the Hero on 1st sight (`overview` with no subtab & not scrolled past Hero),
-  // and attaches under the Main Navbar as soon as the tab changes or the user scrolls past the Hero.
-  const dockUnderMainNav =
-    activeTab !== 'overview' || Boolean(activeSubTab) || isHeroScrolledPast;
-
+  // Smoothly scroll to any section on the single page
   const scrollToElement = useCallback(
     (targetHash) => {
+      if (!targetHash) return;
       setTimeout(() => {
-        ScrollTrigger.refresh();
-        if (!targetHash) {
-          if (lenis) {
-            lenis.scrollTo(0, { duration: 0.85 });
-          } else {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-          return;
-        }
-
         const el = document.querySelector(targetHash);
         if (!el) return;
         const headerEl = document.querySelector('header');
         const headerOffset = headerEl
           ? -(headerEl.getBoundingClientRect().height + 16)
-          : -140;
+          : -135;
 
         if (lenis) {
-          lenis.scrollTo(el, { offset: headerOffset, duration: 1.05 });
+          lenis.scrollTo(el, { offset: headerOffset, duration: 1.1 });
         } else {
           el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 120);
+      }, 80);
     },
     [lenis]
   );
 
-  // Sync URL tab & subtab changes + optional scroll target
-  const handleSelectTab = useCallback(
-    (tabId, subTabId = '', hashTarget = null) => {
-      const nextTab = VALID_TAB_IDS.includes(tabId) ? tabId : 'overview';
-      const nextParams = new URLSearchParams(searchParams);
-      nextParams.set('tab', nextTab);
-      if (subTabId) {
-        nextParams.set('subtab', subTabId);
-      } else {
-        nextParams.delete('subtab');
-      }
-      setSearchParams(nextParams, { replace: false });
-
-      if (hashTarget) {
-        scrollToElement(hashTarget);
-      } else if (nextTab === 'overview' && subTabId === 'distinguished') {
-        scrollToElement('#alumni-distinguished');
-      } else if (nextTab === 'overview' && subTabId === 'stories') {
-        scrollToElement('#alumni-stories');
-      } else if (nextTab === 'overview' && subTabId === 'intro') {
-        scrollToElement('#alumni-intro');
-      } else {
-        scrollToElement(null);
-      }
+  // Open the Full-Page Login / Registration Popup
+  const handleOpenAuthPopup = useCallback(
+    (mode = 'register') => {
+      setAuthPopupMode(mode === 'login' ? 'login' : 'register');
+      setIsAuthPopupOpen(true);
     },
-    [searchParams, setSearchParams, scrollToElement]
+    []
   );
 
-  // Cross-tab navigation handler: allows any element in one tab to jump to another tab/subtab/hash
-  const handleCrossTabNavigate = useCallback(
-    (targetTabId, targetSubTabId = '', targetHash = null, extraOptions = {}) => {
+  const handleCloseAuthPopup = useCallback(() => {
+    setIsAuthPopupOpen(false);
+    // Clean up ?tab=portal if present in URL
+    if (searchParams.get('tab') === 'portal') {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete('tab');
+      nextParams.delete('subtab');
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  // Unified handler for 2nd Sub-Navbar & Hero / Cross-Section actions on the Single Page
+  const handleSectionOrPopupNavigate = useCallback(
+    (sectionId, subId = '', customHash = null, extraOptions = {}) => {
+      // 1. If user clicked "Alumni Registration" / "Alumni Login" CTA in Hero or "Account & Register" in Sub-Navbar -> Open Full-Page Popup!
+      if (sectionId === 'portal') {
+        handleOpenAuthPopup(subId === 'login' ? 'login' : 'register');
+        return;
+      }
+
+      setActiveSection(sectionId);
+      setActiveSubFilter(subId || '');
+
       if (extraOptions.sector) {
         setSelectedSector(extraOptions.sector);
       }
-      handleSelectTab(targetTabId, targetSubTabId, targetHash);
+
+      // 2. Apply section-specific filters & determine target scroll anchor on the single page
+      if (sectionId === 'overview') {
+        if (subId === 'distinguished') {
+          scrollToElement('#alumni-distinguished');
+        } else if (subId === 'stories') {
+          scrollToElement('#alumni-stories');
+        } else if (subId === 'intro') {
+          scrollToElement('#alumni-intro');
+        } else {
+          scrollToElement(customHash || '#alumni-intro');
+        }
+        return;
+      }
+
+      if (sectionId === 'directory') {
+        if (subId && subId !== 'all') {
+          setBatchFilter(subId);
+        } else {
+          setBatchFilter('ALL');
+        }
+        scrollToElement(customHash || '#alumni-directory');
+        return;
+      }
+
+      if (sectionId === 'careers') {
+        if (subId && subId !== 'all') {
+          setSelectedSector(subId);
+        } else {
+          setSelectedSector('ALL');
+        }
+        scrollToElement(customHash || '#alumni-careers');
+        return;
+      }
+
+      if (sectionId === 'updates') {
+        setUpdateCategoryFilter(subId || 'all');
+        scrollToElement(customHash || '#alumni-updates');
+        return;
+      }
+
+      if (sectionId === 'testimonials') {
+        if (subId === 'share') {
+          setAutoOpenShareTestimonial(true);
+          setTimeout(() => setAutoOpenShareTestimonial(false), 600);
+        }
+        scrollToElement(customHash || '#alumni-testimonials');
+        return;
+      }
+
+      const fallbackHash = customHash || SECTION_HASH_MAP[sectionId];
+      if (fallbackHash) {
+        scrollToElement(fallbackHash);
+      }
     },
-    [handleSelectTab]
+    [handleOpenAuthPopup, scrollToElement]
   );
+
+  // Track scroll position to dock the 2nd Navbar under Main Navbar after scrolling past Hero + update active section ScrollSpy
+  useEffect(() => {
+    const handleScroll = () => {
+      if (heroSectionRef.current) {
+        const headerEl = document.querySelector('header');
+        const mainNavHeight = headerEl ? headerEl.offsetHeight : 82;
+        const heroRect = heroSectionRef.current.getBoundingClientRect();
+        setIsHeroScrolledPast(heroRect.bottom - 50 <= mainNavHeight);
+      }
+
+      // ScrollSpy across the single page sections
+      const spyOrder = [
+        { id: 'testimonials', selector: '#alumni-testimonials' },
+        { id: 'updates', selector: '#alumni-updates' },
+        { id: 'directory', selector: '#alumni-directory' },
+        { id: 'careers', selector: '#alumni-careers' },
+        { id: 'overview', selector: '#alumni-intro' },
+      ];
+
+      const triggerLine = 220;
+      for (const item of spyOrder) {
+        const el = document.querySelector(item.selector);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= triggerLine) {
+            setActiveSection(item.id);
+            break;
+          }
+        }
+      }
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Refresh ScrollTrigger whenever activeTab or activeSubTab changes
+  // Support deep links (?tab=portal or #hash)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 180);
-    return () => clearTimeout(timer);
-  }, [activeTab, activeSubTab]);
+    const urlTab = searchParams.get('tab');
+    const urlSubTab = searchParams.get('subtab');
+    if (urlTab === 'portal') {
+      handleOpenAuthPopup(urlSubTab === 'login' ? 'login' : 'register');
+    } else if (urlTab && ALUMNI_TABS.some((t) => t.id === urlTab)) {
+      handleSectionOrPopupNavigate(urlTab, urlSubTab || '');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hash) return;
+    if (hash === '#alumni-register') {
+      handleOpenAuthPopup('register');
+    } else {
+      scrollToElement(hash);
+    }
+  }, [hash, handleOpenAuthPopup, scrollToElement]);
 
   // Load Alumni Hub data + verify active Alumni Session
   useEffect(() => {
@@ -530,6 +614,10 @@ export default function Alumni() {
       ) {
         setTestimonials(hubData.testimonials);
       }
+
+      setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 150);
     };
 
     loadHubAndSession();
@@ -539,32 +627,11 @@ export default function Alumni() {
     };
   }, []);
 
-  // Support deep links using #hash by mapping them to the right tab automatically
-  useEffect(() => {
-    if (!hash) return;
-    const hashToTabMap = {
-      '#alumni-intro': { tab: 'overview', subtab: 'intro' },
-      '#alumni-distinguished': { tab: 'overview', subtab: 'distinguished' },
-      '#alumni-stories': { tab: 'overview', subtab: 'stories' },
-      '#alumni-directory': { tab: 'directory', subtab: 'all' },
-      '#alumni-careers': { tab: 'careers', subtab: 'all' },
-      '#alumni-updates': { tab: 'updates', subtab: 'all' },
-      '#alumni-testimonials': { tab: 'testimonials', subtab: 'feed' },
-      '#alumni-register': { tab: 'portal', subtab: 'register' },
-    };
-
-    const mapped = hashToTabMap[hash];
-    if (mapped && mapped.tab !== activeTab) {
-      handleSelectTab(mapped.tab, mapped.subtab, hash);
-    } else {
-      scrollToElement(hash);
-    }
-  }, [hash]);
-
+  // Clicking a sector card in Industry Network filters the Directory and scrolls smoothly to #alumni-directory
   const handleSectorSelectFromCareers = (sectorName) => {
     setSelectedSector(sectorName);
     if (sectorName !== 'ALL') {
-      handleSelectTab('directory', 'all', '#alumni-directory');
+      scrollToElement('#alumni-directory');
     }
   };
 
@@ -602,95 +669,76 @@ export default function Alumni() {
 
   return (
     <main className="w-full min-h-screen bg-[var(--background)] text-[var(--text-main)] selection:bg-[var(--accent)] selection:text-white">
-      {/* Dynamic Tab Viewport */}
-      <div
-        id="alumni-tab-viewport"
-        className={
-          activeTab === 'overview'
-            ? 'w-full'
-            : 'w-full pt-36 sm:pt-40 md:pt-44 lg:pt-48'
-        }
-      >
-        {activeTab === 'overview' && (
-          <>
-            <AlumniHero
-              config={config}
-              showIntro={true}
-              currentUser={currentUser}
-              onCrossTabNavigate={handleCrossTabNavigate}
-              heroSectionRef={heroSectionRef}
-            />
-            <AlumniDistinguishedAndStories
-              distinguishedAlumni={distinguishedAlumni}
-              successStories={successStories}
-              onCrossTabNavigate={handleCrossTabNavigate}
-            />
-          </>
-        )}
+      {/* 1. Hero Section & Institutional Legacy Introduction (Untouched Hero UI) */}
+      <AlumniHero
+        config={config}
+        showIntro={true}
+        currentUser={currentUser}
+        onCrossTabNavigate={handleSectionOrPopupNavigate}
+        heroSectionRef={heroSectionRef}
+      />
 
-        {activeTab === 'directory' && (
-          <AlumniDirectory
-            directory={directory}
-            selectedSector={selectedSector}
-            onSelectSector={setSelectedSector}
-            initialBatchFilter={activeSubTab || 'ALL'}
-            privacyNotice={config?.privacyNotice}
-            onCrossTabNavigate={handleCrossTabNavigate}
-          />
-        )}
+      {/* 2 & 3. Distinguished Alumni Hall of Fame & Alumni Success Stories */}
+      <AlumniDistinguishedAndStories
+        distinguishedAlumni={distinguishedAlumni}
+        successStories={successStories}
+        onCrossTabNavigate={handleSectionOrPopupNavigate}
+      />
 
-        {activeTab === 'careers' && (
-          <AlumniCareerNetwork
-            careerSectors={config?.careerSectors}
-            directory={directory}
-            selectedSector={
-              activeSubTab && activeSubTab !== 'all'
-                ? activeSubTab
-                : selectedSector
-            }
-            onSelectSector={handleSectorSelectFromCareers}
-          />
-        )}
+      {/* 4. Alumni Career & Industry Network (11 Hospitality Sectors) */}
+      <AlumniCareerNetwork
+        careerSectors={config?.careerSectors}
+        directory={directory}
+        selectedSector={selectedSector}
+        onSelectSector={handleSectorSelectFromCareers}
+      />
 
-        {activeTab === 'updates' && (
-          <AlumniUpdatesAndReunions
-            updates={updates}
-            initialCategoryFilter={activeSubTab || 'all'}
-            currentUser={currentUser}
-            onUpdateRsvpSuccess={handleUpdateRsvpSuccess}
-            onCrossTabNavigate={handleCrossTabNavigate}
-          />
-        )}
+      {/* 5. Batch-Wise Organised Alumni Directory */}
+      <AlumniDirectory
+        directory={directory}
+        selectedSector={selectedSector}
+        onSelectSector={setSelectedSector}
+        initialBatchFilter={batchFilter}
+        privacyNotice={config?.privacyNotice}
+        onCrossTabNavigate={handleSectionOrPopupNavigate}
+      />
 
-        {activeTab === 'testimonials' && (
-          <AlumniTestimonials
-            testimonials={testimonials}
-            currentUser={currentUser}
-            autoOpenShareModal={activeSubTab === 'share'}
-            onCrossTabNavigate={handleCrossTabNavigate}
-          />
-        )}
+      {/* 6. Alumni Newsletter, Upcoming Reunions (Mark as Coming), News & Career Opportunities */}
+      <AlumniUpdatesAndReunions
+        updates={updates}
+        initialCategoryFilter={updateCategoryFilter}
+        currentUser={currentUser}
+        onUpdateRsvpSuccess={handleUpdateRsvpSuccess}
+        onCrossTabNavigate={handleSectionOrPopupNavigate}
+      />
 
-        {activeTab === 'portal' && (
-          <AlumniRegistrationPortal
-            initialMode={activeSubTab === 'login' ? 'login' : 'register'}
-            currentUser={currentUser}
-            onAuthSuccess={handleAuthSuccess}
-            onLogout={handleLogout}
-            onCrossTabNavigate={handleCrossTabNavigate}
-          />
-        )}
-      </div>
+      {/* 7. Alumni Testimonials & Infinite Nested Replies Wall */}
+      <AlumniTestimonials
+        testimonials={testimonials}
+        currentUser={currentUser}
+        autoOpenShareModal={autoOpenShareTestimonial}
+        onCrossTabNavigate={handleSectionOrPopupNavigate}
+      />
 
-      {/* 2nd Sub-Navbar (Rendered after AlumniHero so #alumni-hero-bottom-nav-slot exists on mount;
-          sits at the bottom of the Hero on 1st sight and attaches under Main Nav on tab change or scroll) */}
+      {/* 2nd Sub-Navbar (Sits at bottom of Hero on 1st sight; docks under Main Nav on scroll; scrolls smoothly to any section) */}
       <AlumniSubNavbar
-        activeTab={activeTab}
-        activeSubTab={activeSubTab}
-        onSelectTab={handleSelectTab}
+        activeTab={activeSection}
+        activeSubTab={activeSubFilter}
+        onSelectTab={handleSectionOrPopupNavigate}
         currentUser={currentUser}
         onLogout={handleLogout}
-        dockUnderMainNav={dockUnderMainNav}
+        dockUnderMainNav={isHeroScrolledPast}
+      />
+
+      {/* Full-Page Responsive Popup for Alumni Registration & Login (With Cross ✕ Close Icon) */}
+      <AlumniRegistrationPortal
+        isOpen={isAuthPopupOpen}
+        onClose={handleCloseAuthPopup}
+        initialMode={authPopupMode}
+        currentUser={currentUser}
+        onAuthSuccess={handleAuthSuccess}
+        onLogout={handleLogout}
+        onCrossTabNavigate={handleSectionOrPopupNavigate}
       />
     </main>
   );

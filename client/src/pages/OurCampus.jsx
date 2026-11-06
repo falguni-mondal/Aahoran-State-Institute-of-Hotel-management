@@ -85,7 +85,7 @@ export default function OurCampus() {
       <GalleryHero
         subtitle="Institution Infrastructure"
         title="Our Campus"
-        bgImage="/campus_hero.webp"
+        bgImage="/images/home/sihm.webp"
       />
 
       <section className="w-full pt-20 md:pt-32 lg:pt-40 pb-20 md:pb-32 lg:pb-40 border-t border-[var(--primary-base)]/10">

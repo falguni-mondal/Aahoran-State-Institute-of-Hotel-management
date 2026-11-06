@@ -7,35 +7,35 @@ import { getPublicFacilities } from "../api/campusFacilityApi";
 
 // Default placeholder facilities when no custom facilities are stored in DB yet
 const DEFAULT_FACILITIES_DATA = [
-  {
-    id: "library",
-    title: "Library",
-    images: [
-      {
-        src: "/library_1.jpg",
-        alt: "Students studying at desks in the library",
-      },
-      {
-        src: "/library_2.jpg",
-        alt: "Student reading newspaper in the library",
-      },
-      { src: "/library_3.jpg", alt: "Students researching in the library" },
-    ],
-  },
+  // {
+  //   id: "library",
+  //   title: "Library",
+  //   images: [
+  //     {
+  //       src: "/library_1.jpg",
+  //       alt: "Students studying at desks in the library",
+  //     },
+  //     {
+  //       src: "/library_2.jpg",
+  //       alt: "Student reading newspaper in the library",
+  //     },
+  //     { src: "/library_3.jpg", alt: "Students researching in the library" },
+  //   ],
+  // },
   {
     id: "activities",
     title: "Activities",
     images: [
       {
-        src: "/activities_1.jpg",
+        src: "/images/home/event.webp",
         alt: "Students participating in extracurricular activities",
       },
       {
-        src: "/activities_2.jpg",
+        src: "/images/home/sports.jpeg",
         alt: "Students engaged in a group discussion",
       },
       {
-        src: "/activities_3.jpg",
+        src: "/images/food-production/fp-gallery-4.webp",
         alt: "Students participating in a sports event",
       },
     ],

@@ -17,14 +17,14 @@ const facilitiesData = [
   {
     id: "02",
     title: "Events at SIHM",
-    img: "/events-facility.webp",
+    img: "/images/home/event.webp",
     gridClass: "col-span-1 md:col-span-1 lg:col-span-4",
     link: "/programme-and-events"
   },
   {
     id: "03",
     title: "Activities",
-    img: "/activities.webp",
+    img: "/images/home/sports.jpeg",
     gridClass: "col-span-1 md:col-span-1 lg:col-span-4",
     link: "/campus-facilities#activities"
   },

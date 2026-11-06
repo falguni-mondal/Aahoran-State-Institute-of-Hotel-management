@@ -68,7 +68,7 @@ export default function CFHero() {
       ========================================== */}
       <div className="hero-img-wrapper absolute inset-0 w-full h-full z-0 overflow-hidden">
         <img 
-          src="/facilities_hero.webp" 
+          src="/images/home/campus_front.webp" 
           alt="SIHM Campus Exterior" 
           className="hero-bg-img absolute top-[-10%] left-0 w-full h-[120%] object-cover origin-center"
         />
